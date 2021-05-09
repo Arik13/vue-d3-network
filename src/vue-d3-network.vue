@@ -34,6 +34,9 @@ export default {
     simCb: {
       type: Function
     },
+    dragOnCb: {
+      type: Function
+    },
     customForces: {
       type: Object
     },
@@ -340,6 +343,12 @@ export default {
       return { x, y }
     },
     dragStart (event, nodeKey) {
+      if (!this.dragOnCb()) {
+        return
+      }
+      if (event) {
+        this.$emit('node-drag-start', event, this.nodes[nodeKey])
+      }
       this.dragging = (nodeKey === false) ? false : nodeKey
       this.setMouseOffset(event, this.nodes[nodeKey])
       if (this.dragging === false) {
@@ -348,8 +357,9 @@ export default {
         this.setMouseOffset()
       }
     },
-    dragEnd () {
+    dragEnd (event) {
       let node = this.nodes[this.dragging]
+      this.$emit('node-drag-end', event, node)
       if (node && !node.pinned) {
         // unfix node position
         node.fx = null
